@@ -5,7 +5,6 @@ from token_key import key
 from fpdf import FPDF
 from telebot import types
 from vendor.kermi.kermi_pdf import *
-from vendor.kermi.var import *
 
 bot = telebot.TeleBot(key)
 
