@@ -76,7 +76,7 @@ def set_warm_house(call):
     f = open('vendor/kermi/var/warm_house.txt', 'w')
     f.write(call.text)
     f.close()
-    msgPrice = bot.send_message(call.chat.id, 'Количество комнат с теплым полом:')
+    msgPrice = bot.send_message(call.chat.id, 'Количество комнат с теплым полом: 2 - 12:')
     bot.register_next_step_handler(msgPrice , set_number_of_rooms)
 
 def set_number_of_rooms(call=1): 
