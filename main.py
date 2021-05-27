@@ -5,6 +5,7 @@ from token_key import key
 from fpdf import FPDF
 from telebot import types
 from vendor.kermi.kermi_pdf import *
+import time
 
 bot = telebot.TeleBot(key)
 
@@ -79,7 +80,7 @@ def set_warm_house(call):
     msgPrice = bot.send_message(call.chat.id, 'Количество комнат с теплым полом: 2 - 12:')
     bot.register_next_step_handler(msgPrice , set_number_of_rooms)
 
-def set_number_of_rooms(call=1): 
+def set_number_of_rooms(call): 
     f = open('vendor/kermi/var/number_of_rooms.txt', 'w')
     f.write(call.text)
     f.close()
@@ -92,6 +93,16 @@ def set_number_of_rooms(call=1):
     os.remove('vendor/kermi/var/warm_house.txt')
     os.remove('name.txt')
     os.remove('vendor/kermi/your_calculation.pdf')
+
+    keyboard_end_menu = types.InlineKeyboardMarkup()
+    item_end_1 = types.InlineKeyboardButton(text = 'Повторить расчёт',       callback_data = 'item_end_1')
+    item_end_2 = types.InlineKeyboardButton(text = 'Связаться с менеджером', callback_data = 'item_end_2')
+    keyboard_end_menu.add(item_end_1)
+    keyboard_end_menu.add(item_end_2)
+    
+    time.sleep(1)
+    bot.send_message(call.chat.id, text="Что сделаем дальше?", reply_markup=keyboard_end_menu)
+
 
 #------------------------Конец обработки кнопки item_1_1----------------------------------------------------------------------------
 

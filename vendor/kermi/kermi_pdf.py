@@ -1,6 +1,9 @@
 
 from fpdf import FPDF
 import os.path
+import math
+import time
+
 
 
 def create_pdf():
@@ -25,19 +28,35 @@ def create_pdf():
     number_of_rooms_file = open('vendor/kermi/var/number_of_rooms.txt', 'r')
     number_of_rooms = number_of_rooms_file.read()
 
-#------------Прайс--------------------------------------------------------------------------------------------
-    cena_truba = 0.75
-    kermi_2    = 88.19
-    kermi_3    = 112.21
-    kermi_4    = 136.24
-    kermi_5    = 160.27
-    kermi_6    = 184.29
-    kermi_7    = 208.35
-    kermi_8    = 232.32
-    kermi_9    = 256.34
-    kermi_10   = 301.36
-    kermi_11   = 328.75
-    kermi_12   = 356.15
+#------------Прайс в евро--------------------------------------------------------------------------------------------
+
+    kermi_2           = 88.19
+    kermi_3           = 112.21
+    kermi_4           = 136.24
+    kermi_5           = 160.27
+    kermi_6           = 184.29
+    kermi_7           = 208.35
+    kermi_8           = 232.32
+    kermi_9           = 256.34
+    kermi_10          = 301.36
+    kermi_11          = 328.75
+    kermi_12          = 356.15
+    cena_truba        = 0.75     #Труба полиэтилен PE-RT-5 Kermi x-net 16х2
+    cena_tape         = 14.25    #Лента боковая Kermi x-net H 160 мм (бухта 25 м)
+    cena_foil         = 0.93     #Пленка фольгированная 1мм с разметкой
+    cena_hairpin      = 12.0     #Шпильки для теплого пола упак для такера, 250шт
+    cena_thr_connect  = 2.48     #Резьбовое соединение Kermi x-net 16x2
+    cena_metal_plast  = 1.71     #Труба металлопластиковая Kermi x-net MKV 20 x 2,0 
+    cena_kran_pr      = 23.40    #Комплект кранов прямой 1"х3/4"
+    cena_thread_adapt = 7.12     #Резьбой переходник Kermi x-net "1х25
+    cena_kran_maevsk  = 1.10     #Кран маевского G1/2"
+    cena_provodnik_tr = 1.14     #Проводник трубы Ø14-18
+    cena_homut_tr_25  = 0.79     #Хомут одинарный с резиновым вкладышем для трубы 25
+    cena_izol_tr_25   = 0.58     #Изоляция для труб Ø25 -28х9
+    cena_skotch_50    = 3.15     #скотч для пленки (50 м)
+    cena_enrgo_blue   = 0.42     #Энергофлекс Ø18*9, синяя
+    cena_enrgo_red    = 0.42     #Энергофлекс Ø18*9, красная
+
 
 #------------------------Расчёт-------------------------------------------------------------------------------
 
@@ -47,6 +66,8 @@ def create_pdf():
         truba = float(area) / 0.15
     else:
         truba = float(area) / 0.10
+
+    summ_truba = float(cena_truba * truba)
 
     # 3 строка:
     #В распределителя
@@ -73,8 +94,64 @@ def create_pdf():
     elif int(number_of_rooms) == 12:
        kermi = kermi_12
 
+    # 4 строка:
+    tape      = math.ceil((float(area) * 2) / 25)
+    summ_tape = float(tape * cena_tape)
+
+    # 5 строка
+    foil      = math.ceil(float(area) / 0.9)
+    summ_foil = float(foil * cena_foil)
+
+    # 6 строка
+    hairpin      = math.ceil(float((truba * 3) / 250))
+    summ_hairpin = float(hairpin * cena_hairpin)
+
+     # 7 строка
+    thr_connect      = int(number_of_rooms) * 2
+    summ_thr_connect = float(thr_connect) * cena_thr_connect
+
+    # 8 Строка
+    metal_plast      = math.ceil(float(area) / 5.7)
+    summ_metal_plast = float(metal_plast * cena_metal_plast)
+
+    # 9 Строка
+    kran_pr = 1 #Возможно потребуется добавить логику при увеличении кол-во распределителей
+    summ_kran_pr = kran_pr * cena_kran_pr
+
+    # 10 Строка
+    thread_adapter    = kran_pr * 2
+    summ_thread_adapt = float(thread_adapter * cena_thread_adapt)
+
+    # 11 Строка
+    kran_maevsk      = thr_connect + 1 #Возможно потребуется добавить логику при увеличении кол-во распределителей
+    summ_kran_maevsk = cena_kran_maevsk * kran_maevsk
+
+    # 12 Строка
+    provodnik_tr      = int(number_of_rooms) * 2
+    summ_provodnik_tr = cena_provodnik_tr * provodnik_tr
+
+    # 13 Строка
+    homut_tr_25      = 21
+    summ_homut_tr_25 = cena_homut_tr_25 * float(homut_tr_25)
+
+    # 14 Строка
+    izol_tr_25      = 21
+    summ_izol_tr_25 = cena_izol_tr_25 * float(izol_tr_25)
+
+    # 15 Строка
+    skotch_50       = round(int(area) / 0.9 / 50)
+    summ_skotch_50  = float(skotch_50) * cena_skotch_50
+
+    # 16 Строка
+    enrgo_blue      = number_of_rooms
+    summ_enrgo_blue = float(enrgo_blue) * cena_enrgo_blue
+
+    # 17 Строка
+    enrgo_red      = number_of_rooms
+    summ_enrgo_red = float(enrgo_red) * cena_enrgo_red
+
     # Итого:
-    itogo = float(cena_truba * truba) + kermi
+    itogo = summ_truba + kermi + summ_tape + summ_foil + summ_hairpin + summ_thr_connect + summ_metal_plast + summ_kran_pr + summ_thread_adapt + summ_kran_maevsk + summ_provodnik_tr + summ_homut_tr_25 + summ_izol_tr_25 + summ_skotch_50 + summ_enrgo_blue + summ_enrgo_red
 
 
 #----------PDF---------------------------------------------------------------------------------------------------
@@ -168,9 +245,9 @@ def create_pdf():
     pdf.cell(5, 5, txt='1', border=1, align='C')
     pdf.cell(115, 5, txt='Труба полиэтилен PE-RT-5 Kermi x-net 16х2', border=1)
     pdf.cell(12, 5, txt='м', border=1, align='C')
-    pdf.cell(12, 5, txt=str(round(truba, 2)), border=1, align='C')
+    pdf.cell(12, 5, txt=str(math.ceil(truba)), border=1, align='C')
     pdf.cell(24, 5, txt=str(round(cena_truba, 2)), border=1, align='C')
-    pdf.cell(24, 5, txt=str(round(float(cena_truba * truba), 2)), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(float(summ_truba), 2)), border=1, align='C')
     pdf.ln(5)
 
     #3 строка
@@ -179,133 +256,133 @@ def create_pdf():
     pdf.cell(12, 5, txt='шт', border=1, align='C')
     pdf.cell(12, 5, txt='1', border=1, align='C')
     pdf.cell(24, 5, txt=str(kermi), border=1, align='C')
-    pdf.cell(24, 5, txt=str(kermi), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(kermi, 2)), border=1, align='C')
     pdf.ln(5)
 
     #4 строка
     pdf.cell(5, 5, txt='3', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Лента боковая Kermi x-net H 160 мм (бухта 25 м)', border=1)
+    pdf.cell(12, 5, txt='бух', border=1, align='C')
+    pdf.cell(12, 5, txt=str(round(tape, 0)), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_tape), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_tape, 2)), border=1, align='C')
     pdf.ln(5)
 
     #5 строка
     pdf.cell(5, 5, txt='4', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Пленка фольгированная 1мм с разметкой', border=1)
+    pdf.cell(12, 5, txt='m2', border=1, align='C')
+    pdf.cell(12, 5, txt=str(round(foil, 0)), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_foil), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_foil, 2)), border=1, align='C')
     pdf.ln(5)
 
     #6 строка
     pdf.cell(5, 5, txt='5', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Шпильки для теплого пола упак для такера, 250шт', border=1)
+    pdf.cell(12, 5, txt='упк', border=1, align='C')
+    pdf.cell(12, 5, txt=str(hairpin), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_hairpin), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_hairpin, 2)), border=1, align='C')
     pdf.ln(5)
 
     #7 строка
     pdf.cell(5, 5, txt='6', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Резьбовое соединение Kermi x-net 16x2', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(thr_connect), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_thr_connect), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_thr_connect, 2)), border=1, align='C')
     pdf.ln(5)
 
     #8 строка
     pdf.cell(5, 5, txt='7', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Труба металлопластиковая Kermi x-net MKV 20 x 2,0', border=1)
+    pdf.cell(12, 5, txt='м', border=1, align='C')
+    pdf.cell(12, 5, txt=str(metal_plast), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_metal_plast), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_metal_plast, 2)), border=1, align='C')
     pdf.ln(5)
 
     #9 строка
     pdf.cell(5, 5, txt='8', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Комплект кранов прямой 1"х3/4"', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(kran_pr), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_kran_pr), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round((summ_kran_pr), 2)), border=1, align='C')
     pdf.ln(5)
 
     #10 строка
     pdf.cell(5, 5, txt='9', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Резьбой переходник Kermi x-net "1х25', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(thread_adapter), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_thread_adapt), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_thread_adapt, 2)), border=1, align='C')
     pdf.ln(5)
 
     #11 строка
     pdf.cell(5, 5, txt='10', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Кран маевского G1/2"', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(kran_maevsk), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_kran_maevsk), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_kran_maevsk, 2)), border=1, align='C')
     pdf.ln(5)
 
     #12 строка
     pdf.cell(5, 5, txt='11', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Проводник трубы Ø14-18', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(provodnik_tr), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_provodnik_tr), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_provodnik_tr, 2)), border=1, align='C')
     pdf.ln(5)
 
     #13 строка
     pdf.cell(5, 5, txt='12', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Хомут одинарный с резиновым вкладышем для трубы 25', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(homut_tr_25), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_homut_tr_25), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_homut_tr_25, 2)), border=1, align='C')
     pdf.ln(5)
 
     #14 строка
     pdf.cell(5, 5, txt='13', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Изоляция для труб Ø25 -28х9', border=1)
+    pdf.cell(12, 5, txt='м', border=1, align='C')
+    pdf.cell(12, 5, txt=str(izol_tr_25), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_izol_tr_25), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_izol_tr_25, 2)), border=1, align='C')
     pdf.ln(5)
 
     #15 строка
     pdf.cell(5, 5, txt='14', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Скотч для пленки (50 м)', border=1)
+    pdf.cell(12, 5, txt='шт', border=1, align='C')
+    pdf.cell(12, 5, txt=str(skotch_50), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_skotch_50), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_skotch_50, 2)), border=1, align='C')
     pdf.ln(5)
 
     #16 строка
     pdf.cell(5, 5, txt='15', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(115, 5, txt='Энергофлекс Ø18*9, синяя', border=1)
+    pdf.cell(12, 5, txt='м', border=1, align='C')
+    pdf.cell(12, 5, txt=str(enrgo_blue), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_enrgo_blue), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_enrgo_blue, 2)), border=1, align='C')
     pdf.ln(5)
 
     #17 строка
-    pdf.cell(5, 5, txt='16', border=1, align='C')
-    pdf.cell(115, 5, txt='', border=1)
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(12, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
-    pdf.cell(24, 5, txt='', border=1, align='C')
+    pdf.cell(5, 5, txt='15', border=1, align='C')
+    pdf.cell(115, 5, txt='Энергофлекс Ø18*9, красная', border=1)
+    pdf.cell(12, 5, txt='м', border=1, align='C')
+    pdf.cell(12, 5, txt=str(enrgo_red), border=1, align='C')
+    pdf.cell(24, 5, txt=str(cena_enrgo_red), border=1, align='C')
+    pdf.cell(24, 5, txt=str(round(summ_enrgo_red, 2)), border=1, align='C')
     pdf.ln(5)
 
     #18 строка
@@ -365,6 +442,7 @@ def create_pdf():
     pdf.ln(5)
 
     #PDF-ка
+    time.sleep(1)
     pdf.output('vendor/kermi/your_calculation.pdf')
 
 
