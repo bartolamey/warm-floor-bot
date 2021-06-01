@@ -96,13 +96,12 @@ def set_number_of_rooms(call):
 
     keyboard_end_menu = types.InlineKeyboardMarkup()
     item_end_1 = types.InlineKeyboardButton(text = 'Повторить расчёт',       callback_data = 'item_end_1')
-    item_end_2 = types.InlineKeyboardButton(text = 'Связаться с менеджером', callback_data = 'item_end_2')
+    item_end_2 = types.InlineKeyboardButton(text = 'Связаться с менеджером', url = 'https://t.me/Ilja_daniliuk')
     keyboard_end_menu.add(item_end_1)
     keyboard_end_menu.add(item_end_2)
     
     time.sleep(1)
     bot.send_message(call.chat.id, text="Что сделаем дальше?", reply_markup=keyboard_end_menu)
-
 
 #------------------------Конец обработки кнопки item_1_1----------------------------------------------------------------------------
 
